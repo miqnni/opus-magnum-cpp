@@ -24,5 +24,6 @@ int main()
     curr_height.meters = curr_height.feet * FEET_TO_METERS_FACTOR;
     std::cout << "Height in meters: " << curr_height.meters << std::endl;
 
+    system("pause");
     return 0;
 }
