@@ -1,11 +1,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include <cmath> // abs()
+#include <cmath> // fabs()
 // #include <mutex> // TODO: make mutex work on Windows
 // #include <thread>
 
-#define CHEAT_MODE_ON
+// Print extra information while running the program.
+// #define CHEAT_MODE_ON
+// #define EXTRA_GRADING_INFO
 
 namespace my_constants
 {
@@ -42,9 +44,10 @@ volatile int user_pts;
 //     return curr_points;
 // }
 
-using Dist = long double;
-using Area = long double;
-using Precision = long double;
+using typical_type = long double;
+using Dist = typical_type;
+using Area = typical_type;
+using Precision = typical_type;
 
 constexpr auto STARTING_QUESTION_NUMBER{0uL};
 auto starting_question_number_not_const{STARTING_QUESTION_NUMBER};
@@ -130,7 +133,7 @@ public:
 
 std::ostream &operator<<(std::ostream &os, const RightAngledTriangle &triangle)
 {
-    os << "Right angled triangle\n\t- Cathetus \"a\": " << triangle.cathetus_a << "\n\t- Cathetus \"b\": " << triangle.cathetus_b;
+    os << "Right-angled triangle\n\t- Cathetus \"a\": " << triangle.cathetus_a << "\n\t- Cathetus \"b\": " << triangle.cathetus_b;
     return os;
 }
 
@@ -152,7 +155,8 @@ public:
 
 std::ostream &operator<<(std::ostream &os, const Circle &circle)
 {
-    os << "Circle\n\t- Radius: " << circle.radius;
+    os << "Circle\n\t- Radius: " << circle.radius << std::endl;
+    os << "(While calculating the area, assume PI == " << my_constants::PI_VALUE << ")";
     return os;
 }
 
@@ -174,10 +178,21 @@ private:
     RightAngledTriangle shape_tr;
     Circle shape_c;
 
-    bool
-    isAnswerCorrect(Area user_area)
+    bool isAnswerCorrect(Area user_area)
     {
-        return abs(expected_area - user_area) < precision;
+        Area area_diff = expected_area - user_area;
+        Area area_diff_abs = fabs(area_diff);
+
+#ifdef EXTRA_GRADING_INFO
+        std::cout << "\t\t [EXTRA GRADING INFO]" << std::endl;
+        std::cout << "\t\t usr:" << user_area << std::endl;
+        std::cout << "\t\t exp:" << expected_area << std::endl;
+        std::cout << "\t\t dif:" << area_diff << std::endl;
+        std::cout << "\t\t abs:" << area_diff_abs << std::endl;
+        std::cout << "\t\t prc:" << precision << std::endl;
+#endif // EXTRA_GRADING_INFO
+
+        return area_diff_abs < precision;
     }
 
 public:
@@ -329,7 +344,8 @@ int main()
     for (int i = 0; i < my_constants::MAX_POINTS; i++)
     {
         Area user_ans;
-        std::cout << shape_area_assessment[i];
+        std::cout << std::endl
+                  << shape_area_assessment[i];
         std::cout << "Your answer: ";
         std::cin >> user_ans;
         shape_area_assessment[i].checkAnswer(user_ans);
