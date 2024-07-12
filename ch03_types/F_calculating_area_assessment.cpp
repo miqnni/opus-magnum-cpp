@@ -5,6 +5,8 @@
 // #include <mutex> // TODO: make mutex work on Windows
 // #include <thread>
 
+#define CHEAT_MODE_ON
+
 namespace my_constants
 {
     // The same as:
@@ -142,7 +144,7 @@ public:
 
     Area calculateArea() override
     {
-        return my_constants::PI_VALUE * radius * radius;
+        return (Dist)my_constants::PI_VALUE * radius * radius;
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Circle &circle);
@@ -248,8 +250,8 @@ public:
             status = QuestionStatus::Incorrect;
             wchar_t status_symbol = '(';
             std::wcout << L"Incorrect... :-" << status_symbol << std::endl;
-            std::cout << "\tExpected: " << expected_area << std::endl;
         }
+        std::cout << "\tExpected: " << expected_area << std::endl;
     }
 
     friend std::ostream &operator<<(std::ostream &os, const ShapeAreaQuestion &question);
@@ -274,6 +276,10 @@ std::ostream &operator<<(std::ostream &os, const ShapeAreaQuestion &question)
         break;
     }
     os << std::endl;
+#ifdef CHEAT_MODE_ON
+    os << "[CHEAT MODE] Expected answer: " << question.expected_area
+       << std::endl;
+#endif // CHEAT_MODE_ON
     return os;
 }
 
