@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <string>
+#include <map>
 #include <algorithm> // std::reverse
 #include <iterator>  // std::reverse
 #include <ctime>     // localtime(), asctime()
@@ -10,7 +11,7 @@ using MaskType = unsigned short int;
 
 constexpr MaskType MAX_MASK{0xff};
 constexpr int MONTH_COUNT{12};
-constexpr int FIRST_MONTH_ID{1};
+constexpr int FIRST_MONTH_ID{0};
 constexpr int SETTINGS_COUNT{4};
 
 static_assert(MAX_MASK > 0 && MAX_MASK <= 0xff);
@@ -40,15 +41,60 @@ enum class SettingsFlags : MaskType
     DISPLAY_SETTINGS_ALIGNMENT_F = 0x8,
 };
 
+std::map<Month, std::string> monthNames = {
+    {Month::January, "January"},
+    {Month::February, "February"},
+    {Month::March, "March"},
+    {Month::April, "April"},
+    {Month::May, "May"},
+    {Month::June, "June"},
+    {Month::July, "July"},
+    {Month::August, "August"},
+    {Month::September, "September"},
+    {Month::October, "October"},
+    {Month::November, "November"},
+    {Month::December, "December"},
+};
+
+std::map<Month, const int> monthDays = {
+    {Month::January, 31},
+    {Month::February, 28}, // BEWARE OF LEAP YEARS
+    {Month::March, 31},
+    {Month::April, 30},
+    {Month::May, 31},
+    {Month::June, 30},
+    {Month::July, 31},
+    {Month::August, 31},
+    {Month::September, 30},
+    {Month::October, 31},
+    {Month::November, 30},
+    {Month::December, 31},
+};
+
+Month months[MONTH_COUNT] = {
+    Month::January,
+    Month::February,
+    Month::March,
+    Month::April,
+    Month::May,
+    Month::June,
+    Month::July,
+    Month::August,
+    Month::September,
+    Month::October,
+    Month::November,
+    Month::December,
+};
+
 // A parent class (that contains
 // a virtual method) for
 // CalendarDisplay.
 // Created solely for checking how
-// dynamic_cast works.
+// `dynamic_cast` works.
 class AbstractCalendar
 {
 public:
-    virtual void printCalendar() = 0;
+    virtual void printCalendar(int year) = 0;
 };
 
 class CalendarDisplay : public AbstractCalendar
@@ -165,11 +211,31 @@ public:
         monthsToDisplay = tmpMonthMask;
     }
 
-    void printCalendar()
+    void printCalendar(int year)
     {
-        std::cout << "CALENDAR" << std::endl;
-        std::cout << "Settings: " << std::hex << settings << std::endl;
-        std::cout << "Months: " << std::hex << monthsToDisplay << std::endl;
+        // std::cout << "CALENDAR" << std::endl;
+        // std::cout << "Settings: " << std::hex << settings << std::endl;
+        // std::cout << "Months: " << std::hex << monthsToDisplay << std::endl;
+
+        std::cout << "Calendar - " << year << std::endl
+                  << std::endl
+                  << std::endl;
+
+        int monthsChecked;
+        MaskType currMonthBit;
+        for (monthsChecked = 0, currMonthBit = 1 << (MONTH_COUNT - 1); currMonthBit > 0; monthsChecked++, currMonthBit >>= 1)
+        {
+            if (currMonthBit & monthsToDisplay)
+            {
+                std::cout << std::endl
+                          << "  ------------" << monthNames[months[monthsChecked]] << "------------" << std::endl;
+
+                if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_DAY_OF_WEEK_HEADER_F))
+                    std::cout << "  Sun  Mon  Tue  Wed  Thu  Fri  Sat" << std::endl;
+            }
+        }
+
+        // TODO: ...displaying the calendar...
 
         if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_CURRENT_DATE_F))
             printCurrentTime();
@@ -177,13 +243,17 @@ public:
         if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_SETTINGS_SIZE_F))
         {
             size_t calendarDisplaySizeInBytes = sizeof(CalendarDisplay);
-            std::cout << "[DISPLAY SIZE] CalendarDisplay objects' size in bytes: " << calendarDisplaySizeInBytes << std::endl;
+            std::cout << std::endl
+                      << "[DISPLAY SIZE] CalendarDisplay objects' size in bytes: " << std::endl
+                      << calendarDisplaySizeInBytes << std::endl;
         }
 
         if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_SETTINGS_ALIGNMENT_F))
         {
             int calendarDisplayAddressIsMultipleOf = alignof(CalendarDisplay);
-            std::cout << "[DISPLAY ADDRESS ALIGNMENT] CalendarDisplay objects' address is a multiple of: " << calendarDisplayAddressIsMultipleOf << std::endl;
+            std::cout << std::endl
+                      << "[DISPLAY ADDRESS ALIGNMENT] CalendarDisplay objects' address is a multiple of: " << std::endl
+                      << calendarDisplayAddressIsMultipleOf << std::endl;
         }
     }
 };
@@ -198,7 +268,6 @@ int main()
     try
     {
         // Playground for testing const_cast, dynamic_cast and reinterpret_cast
-
         const bool displayDayOfWeekHeader{false};
         const bool displayCurrentDate{false};
         const bool displaySettingsSize{false};
@@ -311,10 +380,18 @@ jfmamjjasond
             finalArgs[3],
             monthSelection);
 
-        calendarDisplay.printCalendar();
+        int userYear;
+        std::cout << "Year (to be displayed by the calendar): ";
+        std::cin >> userYear;
+
+        if (userYear <= 0)
+            throw std::runtime_error("The year must be a positive number.");
+
+        calendarDisplay.printCalendar(userYear);
 
         // Use of dynamic_cast purely for fun.
-        std::cout << "Address of the used CalendarDisplay class object: " << dynamic_cast<AbstractCalendar *>(&calendarDisplay) << std::endl;
+        std::cout << std::endl
+                  << "Address of the used CalendarDisplay class object: " << dynamic_cast<AbstractCalendar *>(&calendarDisplay) << std::endl;
     }
     catch (const std::exception &e)
     {
