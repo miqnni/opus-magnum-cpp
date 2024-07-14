@@ -6,6 +6,8 @@
 #include <algorithm> // std::reverse
 #include <iterator>  // std::reverse
 #include <ctime>     // localtime(), asctime()
+#include <iomanip>   // std::setw()
+#include <ios>
 
 using MaskType = unsigned short int;
 
@@ -102,9 +104,25 @@ class CalendarDisplay : public AbstractCalendar
 private:
     MaskType settings;
     MaskType monthsToDisplay;
-    // Months to display:
-    // jfmamjjasond
-    // 010101010110 -- max. 2^12 - 1
+
+    int dayOfWeek(int day, int month, int year)
+    {
+        // Sakamoto's method of determining the day of the week.
+        // Accurate for any GREGORIAN date.
+        // https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week#Sakamoto's_methods
+
+        static int t[] = {0, 3, 2, 5, 0, 3, 5, 1,
+                          4, 6, 2, 4};
+
+        int year_alt{year};
+
+        if (month < 3)
+        {
+            year_alt--;
+        }
+
+        return (year_alt + year_alt / 4 - year_alt / 100 + year_alt / 400 + t[month - 1] + day) % 7;
+    }
 
     void printCurrentTime()
     {
@@ -156,8 +174,7 @@ public:
             // SETTINGS MASK
 
             bool inputSettings[SETTINGS_COUNT] = {
-                // flag values
-                displayDayOfWeekHeader,   // 0x1
+                displayDayOfWeekHeader,   // 0x1 <-- corresponding flag values
                 displayCurrentDate,       // 0x2
                 displaySettingsSize,      // 0x4
                 displaySettingsAlignment, // 0x8
@@ -172,11 +189,9 @@ public:
 
             for (bool includeCurrOption : inputSettings)
             {
-                tmpSettingsMask <<= 1; // First iteration => nothing happens
+                tmpSettingsMask <<= 1; // First iteration => nothing happens.
                 tmpSettingsMask |= static_cast<MaskType>(includeCurrOption);
             }
-
-            settings = tmpSettingsMask;
 
             // MONTHS MASK
 
@@ -197,11 +212,9 @@ public:
                     throw std::runtime_error("Incorrect character in your month input.");
                 }
 
-                tmpMonthMask <<= 1; // First iteration => nothing happens
+                tmpMonthMask <<= 1; // First iteration => nothing happens.
                 tmpMonthMask |= static_cast<MaskType>(includeCurrMonth);
             }
-
-            monthsToDisplay = tmpMonthMask;
         }
         catch (const std::exception &e)
         {
@@ -217,6 +230,7 @@ public:
         // std::cout << "Settings: " << std::hex << settings << std::endl;
         // std::cout << "Months: " << std::hex << monthsToDisplay << std::endl;
 
+        // Print the calendar itself
         std::cout << "Calendar - " << year << std::endl
                   << std::endl
                   << std::endl;
@@ -225,18 +239,57 @@ public:
         MaskType currMonthBit;
         for (monthsChecked = 0, currMonthBit = 1 << (MONTH_COUNT - 1); currMonthBit > 0; monthsChecked++, currMonthBit >>= 1)
         {
-            if (currMonthBit & monthsToDisplay)
-            {
-                std::cout << std::endl
-                          << "  ------------" << monthNames[months[monthsChecked]] << "------------" << std::endl;
+            // Skip the months that were excluded in the user's input.
+            if (!(currMonthBit & monthsToDisplay))
+                continue;
 
-                if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_DAY_OF_WEEK_HEADER_F))
-                    std::cout << "  Sun  Mon  Tue  Wed  Thu  Fri  Sat" << std::endl;
+            std::cout << std::endl
+                      << "  ------------" << monthNames[months[monthsChecked]] << "------------" << std::endl;
+
+            if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_DAY_OF_WEEK_HEADER_F))
+                std::cout << "  Sun  Mon  Tue  Wed  Thu  Fri  Sat" << std::endl;
+
+            int daysInCurrMonth = monthDays[months[monthsChecked]];
+
+            // Manually increase the number of days
+            // in February if it's a leap year.
+            if (months[monthsChecked] == Month::February)
+            {
+                daysInCurrMonth += static_cast<int>(
+                    (!(year % 4) && (year % 100)) // year divisible by 4, but not by 100
+                    ||                            // OR
+                    !(year % 400)                 // year divisible by 400
+                );
             }
+
+            int currDayOfWeek{dayOfWeek(1, monthsChecked + 1, year)};
+
+            // Print the blank spaces for days of the week
+            // that were not present in the first week of the month.
+            for (int indentNo{0}; indentNo < currDayOfWeek; indentNo++)
+                std::cout << "     ";
+
+            // Save default formatting (setw(5) will be a change in formatting that
+            // we will want to reset later on).
+            std::ios init(NULL);
+            init.copyfmt(std::cout);
+
+            // Print the day numbers in their correct columns and rows.
+            for (int currDayNo{1}; currDayNo <= daysInCurrMonth; currDayNo++, currDayOfWeek = (currDayOfWeek + 1) % 7)
+            {
+                std::cout << std::setw(5) << currDayNo;
+
+                if (currDayNo < daysInCurrMonth)
+                    std::cout << (currDayOfWeek == 6 ? "\n" : "");
+            }
+
+            // Reverse the changes made to the formatting.
+            std::cout.copyfmt(init);
+
+            std::cout << std::endl;
         }
 
-        // TODO: ...displaying the calendar...
-
+        // Display more info according to settings.
         if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_CURRENT_DATE_F))
             printCurrentTime();
 
@@ -258,11 +311,6 @@ public:
     }
 };
 
-// int dayOfWeek(int day, int month, int year)
-// {
-//     return -1;
-// }
-
 int main()
 {
     try
@@ -272,10 +320,6 @@ int main()
         const bool displayCurrentDate{false};
         const bool displaySettingsSize{false};
         const bool displaySettingsAlignment{false};
-        // jfmamjjasond
-        // oxxoxxooxooo <-- example user input
-        // o -- display month
-        // x -- skip month
 
         bool *settingsPointers[SETTINGS_COUNT] = {
             const_cast<bool *>(&displayDayOfWeekHeader),
@@ -306,12 +350,12 @@ int main()
         {
             int idxForBoth;
             idxForBoth = currQuestionSettingsIdx++;
-            std::cout << questionBank[idxForBoth] << " (y/n):";
+            std::cout << "Q" << currQuestionSettingsIdx << ": " << questionBank[idxForBoth] << " (y/n): ";
             std::cin >> userChoice;
             *settingsPointers[idxForBoth] = tolower(userChoice) == 'y';
         };
 
-        // [START> Use of reinterpret_cast in both ways purely for fun (totally impractical)
+        // Use of reinterpret_cast in both ways purely for fun (totally impractical).
         void *onlyAddresses[SETTINGS_COUNT];
         int onlyAddressesIdx{0};
         for (bool *boolAddr : settingsPointers)
@@ -326,7 +370,7 @@ int main()
         {
             finalArgs[finalArgsIdx++] = *(reinterpret_cast<bool *>(voidAddr));
         }
-        // reinterpret_cast <END]
+        // End of use of reinterpret_cast.
 
         std::cout << R"(
 
@@ -362,7 +406,7 @@ jfmamjjasond
         std::string monthSelection;
 
         // Get rid of every line from the standard input stream
-        // before calling the getline() function
+        // before calling the getline() function.
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         getline(std::cin, monthSelection);
 
