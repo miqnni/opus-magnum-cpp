@@ -71,6 +71,22 @@ private:
         // currentTime = time(NULL);
         // Version B
         time(&currentTime);
+
+        // Converting currentTime to an object of
+        // structure `tm`, where we can access
+        // hours, minutes and seconds using
+        // `tm_hour`, `tm_min`, `tm_sec`
+        // respectively.
+        tm *currentTimeLocal = localtime(&currentTime);
+
+        // Hex values of hh:mm:ss
+        // std::cout << std::endl
+        //           << "Current date and time: " << currentTimeLocal->tm_hour << ":" << currentTimeLocal->tm_min << ":" << currentTimeLocal->tm_sec << std::endl;
+
+        std::string currentTimeReadable = asctime(currentTimeLocal);
+        std::cout << std::endl
+                  << "Current date and time: " << std::endl
+                  << currentTimeReadable << std::endl;
     }
 
 public:
@@ -156,10 +172,7 @@ public:
         std::cout << "Months: " << std::hex << monthsToDisplay << std::endl;
 
         if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_CURRENT_DATE_F))
-        {
-            std::cout << std::endl
-                      << "Current date and time: " << "(insert here)" << std::endl;
-        }
+            printCurrentTime();
 
         if (settings & static_cast<MaskType>(SettingsFlags::DISPLAY_SETTINGS_SIZE_F))
         {
