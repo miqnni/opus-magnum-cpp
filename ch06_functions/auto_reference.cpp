@@ -28,7 +28,8 @@ int main()
     auto &refMyDoubleReference{myDoubleReference};           // (type: double &)
     auto &refMyDoubleConstReference{myDoubleConstReference}; // (type: const double &)
 
-    myDouble = -17;
+    // myDouble = -17;
+    myDoubleReference = -17; // The same effect as above.
     compareVariables(refMyDouble, "refMyDouble", myDouble, "myDouble");
     compareVariables(refMyDoubleReference, "refMyDoubleReference", myDoubleReference, "myDoubleReference");
     compareVariables(refMyDoubleConstReference, "refMyDoubleConstReference", myDoubleConstReference, "myDoubleConstReference");
