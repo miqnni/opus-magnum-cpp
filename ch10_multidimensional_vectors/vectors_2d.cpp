@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <iomanip>
+#include <iomanip> // setw
 
 constexpr int ELEMENT_VALUE_FIELD_WIDTH{4};
 constexpr int ROW_INDEX_FIELD_WIDTH{2};
@@ -67,6 +67,64 @@ int main()
     printVector2D(sample1, "sample1 (after popping back from row 8)");
     // ****************
 
+    // **************** SAMPLE 2 (Task 10.6)
+    std::vector<std::vector<int>> sample2{
+        {0, 1, 2, 3},
+        {10, 11, 12, 13}};
+    printVector2D(sample2, "sample2");
+    // ****************
+
+    // **************** SAMPLE 3 (Task 10.7)
+    std::vector<std::vector<int>> sample3;
+
+    sample3.resize(2);
+    for (auto &row : sample3)
+    {
+        row.resize(4);
+    }
+
+    for (int i = 0; i < sample3[0].size(); i++)
+    {
+        sample3[0][i] = i;
+        sample3[1][i] = i + 10;
+    }
+    printVector2D(sample3, "sample3");
+    // ****************
+
+    // **************** SAMPLE 4 (Task 10.8)
+    std::vector<std::vector<int>> sample4;
+
+    for (int i = 0; i < 2; i++)
+    {
+        sample4.push_back({});
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        sample4[0].push_back(i);
+        sample4[1].push_back(i + 10);
+    }
+
+    printVector2D(sample4, "sample4");
+    // ****************
+
+    // **************** SAMPLE 5 (Task 10.9)
+    std::vector<std::vector<int>> sample5(
+        3,
+        std::vector<int>(
+            7,
+            10));
+
+    sample5[0][2] = 250;
+    sample5[1][3] = 360;
+    sample5[2][4] = 470;
+
+    printVector2D(sample5, "sample5 (before pop_back)");
+
+    sample5.pop_back();
+
+    printVector2D(sample5, "sample5 (after pop_back)");
+    // ****************
     return 0;
 }
 
