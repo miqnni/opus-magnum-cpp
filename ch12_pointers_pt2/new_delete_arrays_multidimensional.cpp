@@ -10,9 +10,9 @@ int main()
     std::cout << "What size should we replace `[ ? ]` with ? ";
     std::cin >> arraySizeX;
 
-    // int(*array3DPtr)[ARRAY_SIZE_Y][ARRAY_SIZE_Z] = new int[arraySizeX][ARRAY_SIZE_Y][ARRAY_SIZE_Z]; // (dynamic) Memory allocation.
+    int(*array3DPtr)[ARRAY_SIZE_Y][ARRAY_SIZE_Z] = new int[arraySizeX][ARRAY_SIZE_Y][ARRAY_SIZE_Z]; // (dynamic) Memory allocation.
     // OR
-    auto *array3DPtr = new int[arraySizeX][ARRAY_SIZE_Y][ARRAY_SIZE_Z];
+    // auto *array3DPtr = new int[arraySizeX][ARRAY_SIZE_Y][ARRAY_SIZE_Z];
 
     *array3DPtr[0][0] = 1003;
     std::cout << "array3DPtr[0][0][0]: " << array3DPtr[0][0][0] << std::endl;
@@ -21,5 +21,6 @@ int main()
     std::cout << "array3DPtr[" << arraySizeX - 1 << "][" << ARRAY_SIZE_Y - 1 << "][" << ARRAY_SIZE_Z - 1 << "]: " << array3DPtr[arraySizeX - 1][ARRAY_SIZE_Y - 1][ARRAY_SIZE_Z - 1] << std::endl;
 
     delete[] array3DPtr;
+    array3DPtr = nullptr;
     return 0;
 }

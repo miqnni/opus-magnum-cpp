@@ -32,9 +32,13 @@ int main()
     // ****************
     // Deleting objects
     delete globalCharPtr;
+    globalCharPtr = nullptr;
     delete mainCharPtr0;
+    mainCharPtr0 = nullptr;
     delete mainCharPtr1;
+    mainCharPtr1 = nullptr;
     delete mainCharPtr2;
+    mainCharPtr2 = nullptr;
 
     return 0;
 }

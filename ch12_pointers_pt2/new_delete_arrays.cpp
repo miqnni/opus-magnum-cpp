@@ -36,6 +36,7 @@ int main()
         const int *markedArrayIndexPtr{new const int{arraySize - 1}};
         arrayPtr[*markedArrayIndexPtr] = 32;
         delete markedArrayIndexPtr;
+        markedArrayIndexPtr = nullptr;
 
         // Print array elements.
         for (int i{}; i < arraySize; i++)
@@ -44,6 +45,7 @@ int main()
         }
 
         delete[] arrayPtr; // Operator `delete[]` does not return any value (the result type is `void`).
+        arrayPtr = nullptr;
     }
     catch (const std::exception &e)
     {
