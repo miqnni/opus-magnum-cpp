@@ -23,6 +23,7 @@ int sumIf(std::vector<int> numbers, ConditionFunction condition)
     }
     return finalSum;
 }
+
 int countIf(std::vector<int> numbers, ConditionFunction condition)
 {
     int finalCount{};
