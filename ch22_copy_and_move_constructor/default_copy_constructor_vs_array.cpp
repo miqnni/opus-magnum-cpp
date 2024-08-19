@@ -116,7 +116,7 @@ int main()
 
         normalB.replacement('I', 1998);
         std::cout << "A ";
-        normalA.details(); // Should not change. But without the default copy constructor it changes.
+        normalA.details(); // Should not change. But with the default copy constructor it changes.
         std::cout << "B ";
         normalB.details();
 
