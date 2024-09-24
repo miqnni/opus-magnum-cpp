@@ -1,6 +1,7 @@
 */out/
 .vscode/
 *.exe
+*.bin
 *_official/
 */tempCodeRunnerFile.cpp
 extra/
