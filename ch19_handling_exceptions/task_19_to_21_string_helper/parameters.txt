@@ -1,0 +1,9 @@
+The beginning of the file.
+A line with some general information.
+beta  				45.3
+alpha     			23
+delta   			1024
+omega  			88.2
+//epsilon    			44.4
+operation_flag 		1
+//PI				3.1416
